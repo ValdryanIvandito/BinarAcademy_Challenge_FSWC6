@@ -1,0 +1,25 @@
+<%- include('layouts/header') %>
+
+<% if (result === 'PLAYER1 WIN!' && playerOne === 'scissors' && playerCom === 'paper') { %>
+    <%- include('layouts/p1-sp') %>
+<% } else if (result === 'PLAYER1 WIN!' && playerOne === 'paper' && playerCom === 'rock') { %>
+    <%- include('layouts/p1-pr') %>
+<% } else if (result === 'PLAYER1 WIN!' && playerOne === 'rock' && playerCom === 'scissors') { %>
+    <%- include('layouts/p1-rs') %>
+<% } else if (result == 'COM WIN!' && playerCom === 'scissors' && playerOne === 'paper') { %>
+    <%- include('layouts/pc-sp') %>
+<% } else if (result == 'COM WIN!' && playerCom === 'paper' && playerOne === 'rock') { %>
+    <%- include('layouts/pc-pr') %>
+<% } else if (result == 'COM WIN!' && playerCom === 'rock' && playerOne === 'scissors') { %>
+    <%- include('layouts/pc-rs') %>
+<% } else if (result == 'DRAW!' && playerCom === 'scissors' && playerOne === 'scissors') { %>
+    <%- include('layouts/drw-ss') %>
+<% } else if (result == 'DRAW!' && playerCom === 'paper' && playerOne === 'paper') { %>
+    <%- include('layouts/drw-pp') %>
+<% } else if (result == 'DRAW!' && playerCom === 'rock' && playerOne === 'rock') { %>
+    <%- include('layouts/drw-rr') %>
+<% } else { %>
+    <%- include('layouts/content') %>
+<% } %>
+
+<%- include('layouts/footer') %>

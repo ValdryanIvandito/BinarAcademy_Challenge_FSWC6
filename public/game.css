@@ -1,0 +1,180 @@
+* {
+    margin: 0;
+    padding: 0;
+    /* box-sizing: inherit; */
+  }
+
+body {
+    background-color: #9C835F;
+    /* width: 100vh;
+    height: 100vh; */
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+
+
+
+.tBack {
+    font-family: 'Open Sans', sans-serif; 
+    font-size: 72px; 
+    font-weight: bold; 
+    color:#724C21;
+    text-decoration: none;
+    padding-left: 25px;
+}
+
+.tBack:hover {
+    font-family: 'Open Sans', sans-serif; 
+    font-size: 72px; 
+    font-weight: bold; 
+    color: #C4C4C4;
+    text-decoration: none;
+    padding-left: 25px;
+}
+
+.tTitle {
+    font-family: 'Open Sans', sans-serif; 
+    font-size: 36px; 
+    font-weight: bold; 
+    color:#F9B23D;
+}
+
+.tPlayer1 {
+    font-family: 'Open Sans', sans-serif; 
+    font-size: 36px; 
+    font-weight: bold; 
+    color: black;
+    /* text-align: center; */
+}
+
+.tCOM {
+    font-family: 'Open Sans', sans-serif; 
+    font-size: 36px; 
+    font-weight: bold; 
+    color: black;
+    /* text-align: center;  */
+}
+
+.tSigns {
+    font-family: 'Open Sans', sans-serif; 
+    font-size: 144px; 
+    font-weight: bold; 
+    color: #BD0000;
+    /* text-align: center;  */
+}
+
+.tSignsWin {
+    font-family: 'Open Sans', sans-serif; 
+    font-size: 38px; 
+    font-weight: bold; 
+    color: white;
+    text-align: center; 
+    background-color:#4C9654;
+    width: 270px;
+    height: 167px;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    transform: rotate(-29deg);
+}
+
+.tSignsDraw {
+    font-family: 'Open Sans', sans-serif; 
+    font-size: 38px; 
+    font-weight: bold; 
+    color: white;
+    text-align: center; 
+    background-color: #035B0C;
+    width: 270px;
+    height: 167px;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    transform: rotate(-29deg);
+}
+
+
+
+
+.bRefresh:hover {
+    background-color: #C4C4C4;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20%;
+}
+
+.bRefresh {
+    background-color: transparent;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20%;
+}
+
+.bP1Rock:hover {
+    background-color: #C4C4C4;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20%;
+}
+
+.bP1Rock {
+    background-color: transparent;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20%;
+}
+
+.bP1Paper:hover {
+    background-color: #C4C4C4;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20%;
+}
+
+.bP1Paper {
+    background-color: transparent;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20%;
+}
+
+.bP1Scissors:hover {
+    background-color: #C4C4C4;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20%;
+}
+
+.bP1Scissors {
+    background-color: transparent;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20%;
+}
+
+.iPCRock {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20%;
+}
+
+.iPCPaper {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20%;
+}
+
+.iPCScissors {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20%;
+}
+
+.hidden {
+    background-color: #C4C4C4;
+}
