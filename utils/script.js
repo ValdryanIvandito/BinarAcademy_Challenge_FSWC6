@@ -1,6 +1,7 @@
 const fs = require('fs');
 const value = ["scissors", "paper", "rock"];
 let valueOne, valueCom;
+let scores = 0;
 
 function rockP1() {
     valueOne = "rock";
@@ -27,60 +28,64 @@ function gameStart(valueOne) {
     //playerOne Win Scenario
     if(valueOne === 'scissors' && valueCom === 'paper') {
         const result = "PLAYER1 WIN!";
-        return { valueOne, valueCom, result };
+        scores = scores + 1;
+        return { valueOne, valueCom, result, scores };
     }
 
     else if(valueOne === "paper" && valueCom === "rock") {
         const result = "PLAYER1 WIN!";
-        return { valueOne, valueCom, result };
+        scores = scores + 1;
+        return { valueOne, valueCom, result, scores };
     }
 
     else if(valueOne === 'rock' && valueCom === "scissors") {
         const result = "PLAYER1 WIN!";
-        return { valueOne, valueCom, result };
+        scores = scores + 1;
+        return { valueOne, valueCom, result, scores };
     }
 
     //playerCom Win Scenario
     else if(valueCom === 'scissors' && valueOne === "paper") {
         const result = "COM WIN!";
-        return { valueOne, valueCom, result };
+        return { valueOne, valueCom, result, scores };
     }
 
     else if(valueCom === "paper" && valueOne === "rock") {
         const result = "COM WIN!";
-        return { valueOne, valueCom, result };
+        return { valueOne, valueCom, result, scores };
     }
 
     else if(valueCom === 'rock' && valueOne === "scissors") {
         const result = "COM WIN!";
-        return { valueOne, valueCom, result };
+        return { valueOne, valueCom, result, scores };
     }
 
     //Draw Scenario
     else if(valueCom === 'rock' && valueOne === 'rock') {
         const result = "DRAW!";
-        return { valueOne, valueCom, result };
+        return { valueOne, valueCom, result, scores };
     }
 
     else if(valueCom === 'paper' && valueOne === 'paper') {
         const result = "DRAW!";
-        return { valueOne, valueCom, result };
+        return { valueOne, valueCom, result, scores };
     }
 
     else {
         const result = "DRAW!";
-        return { valueOne, valueCom, result };
+        return { valueOne, valueCom, result, scores };
     }
 }
 
-const gamelog = (playerOne, playerCom, result) => {
+const gamelog = (playerOne, playerCom, result, scores) => {
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', timeZoneName: 'short' };
     const timestamp = new Date().toLocaleString('en-US', options);
     const newgamelog = {
         timestamp,
         playerOne,
         playerCom,
-        result
+        result,
+        scores
     }
     const dataBuffer = fs.readFileSync('./db/gamelog.json', 'utf-8');
     const gamelog = JSON.parse(dataBuffer);
@@ -88,4 +93,16 @@ const gamelog = (playerOne, playerCom, result) => {
     fs.writeFileSync('db/gamelog.json', JSON.stringify(gamelog));
 }
 
-module.exports = { rockP1, paperP1, scissorsP1, gamelog };
+const readScoresBuffer = () => {
+    const scoresBuffer = JSON.parse(fs.readFileSync('./db/scores-buffer.json', 'utf-8'));
+    const result = Number(scoresBuffer.scores);
+    return result;
+}
+
+const writeScoresBuffer = (scoresResult) => {
+    const result = { scores: 0 };
+    result.scores = scoresResult;
+    fs.writeFileSync('./db/scores-buffer.json', JSON.stringify(result));
+}
+
+module.exports = { rockP1, paperP1, scissorsP1, gamelog, readScoresBuffer, writeScoresBuffer };

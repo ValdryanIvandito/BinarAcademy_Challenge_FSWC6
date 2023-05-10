@@ -1,5 +1,9 @@
 <%- include('layouts/header') %>
 
+<div class="container" style="display: flex; align-items: center; justify-content: center; height: 100%;">
+    <p class="tScores">SCORES <%= scoresResult %></p>
+</div>
+
 <% if (result === 'PLAYER1 WIN!' && playerOne === 'scissors' && playerCom === 'paper') { %>
     <%- include('layouts/p1-sp') %>
 <% } else if (result === 'PLAYER1 WIN!' && playerOne === 'paper' && playerCom === 'rock') { %>

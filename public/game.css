@@ -16,9 +16,6 @@ body {
     align-items: center;
   }
 
-
-
-
 .tBack {
     font-family: 'Open Sans', sans-serif; 
     font-size: 72px; 
@@ -53,6 +50,22 @@ body {
 }
 
 .tCOM {
+    font-family: 'Open Sans', sans-serif; 
+    font-size: 36px; 
+    font-weight: bold; 
+    color: black;
+    /* text-align: center;  */
+}
+
+.tScores {
+    font-family: 'Open Sans', sans-serif; 
+    font-size: 36px; 
+    font-weight: bold; 
+    color: black;
+    /* text-align: center;  */
+}
+
+.tScoresResult {
     font-family: 'Open Sans', sans-serif; 
     font-size: 36px; 
     font-weight: bold; 
@@ -97,9 +110,6 @@ body {
     display: flex;
     transform: rotate(-29deg);
 }
-
-
-
 
 .bRefresh:hover {
     background-color: #C4C4C4;

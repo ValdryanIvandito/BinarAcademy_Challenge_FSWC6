@@ -1,5 +1,5 @@
 const express = require('express');
-const { rockP1, paperP1, scissorsP1, gamelog } = require('../utils/script.js');
+const { rockP1, paperP1, scissorsP1, gamelog, readScoresBuffer, writeScoresBuffer } = require('../utils/script.js');
 
 const router = express.Router();
 
@@ -9,13 +9,24 @@ router.get('/', (req, res) => {
     res.render('index', { title });
 });
 
+router.get('/sign-in', (req, res) => {
+    const title = 'sign-in';
+    res.status(200);
+    res.render('sign-up', { title });
+});
+
 router.get('/game', (req, res) => {
     const title = 'game page';
     const playerOne = null;
     const playerCom = null;
     const result = null;
+    const scoresResult = readScoresBuffer()
     res.status(200);
-    res.render('game', { title, playerOne, playerCom, result });
+    res.render('game', { title, playerOne, playerCom, result, scoresResult });
+});
+
+router.post('/sign-in', (req, res) => {
+    res.redirect('sign-in');
 });
 
 router.post('/submit-game', (req, res) => {
@@ -36,9 +47,14 @@ router.post('/submit-rock', (req, res) => {
     const playerOne = value.valueOne;
     const playerCom = value.valueCom;
     const result = value.result;
-    gamelog(playerOne, playerCom, result);
+    const scores = value.scores;
+    
+    const scoresResult = readScoresBuffer() + scores;
+    writeScoresBuffer(scoresResult);
+
+    gamelog(playerOne, playerCom, result, scoresResult);
     res.status(200);
-    res.render('game', { title, playerOne, playerCom, result });
+    res.render('game', { title, playerOne, playerCom, result, scoresResult });
 });
 
 router.post('/submit-paper', (req, res) => {
@@ -47,9 +63,15 @@ router.post('/submit-paper', (req, res) => {
     const playerOne = value.valueOne;
     const playerCom = value.valueCom;
     const result = value.result;
-    gamelog(playerOne, playerCom, result);
+    const scores = value.scores;
+    
+    const scoresResult = readScoresBuffer() + scores;
+    writeScoresBuffer(scoresResult);
+
+    gamelog(playerOne, playerCom, result, scoresResult);
+
     res.status(200);
-    res.render('game', { title, playerOne, playerCom, result });
+    res.render('game', { title, playerOne, playerCom, result, scoresResult });
 });
 
 router.post('/submit-scissors', (req, res) => {
@@ -58,9 +80,15 @@ router.post('/submit-scissors', (req, res) => {
     const playerOne = value.valueOne;
     const playerCom = value.valueCom;
     const result = value.result;
-    gamelog(playerOne, playerCom, result);
+    const scores = value.scores;
+    
+    const scoresResult = readScoresBuffer() + scores;
+    writeScoresBuffer(scoresResult);
+
+    gamelog(playerOne, playerCom, result, scoresResult);
+
     res.status(200);
-    res.render('game', { title, playerOne, playerCom, result });
+    res.render('game', { title, playerOne, playerCom, result, scoresResult });
 });
 
 router.get('*', (req, res) => {
