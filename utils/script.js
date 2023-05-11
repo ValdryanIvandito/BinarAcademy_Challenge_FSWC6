@@ -105,4 +105,56 @@ const writeScoresBuffer = (scoresResult) => {
     fs.writeFileSync('./db/scores-buffer.json', JSON.stringify(result));
 }
 
-module.exports = { rockP1, paperP1, scissorsP1, gamelog, readScoresBuffer, writeScoresBuffer };
+// load profiles data from user-profiles.json
+const loadProfiles = () => {
+    const dataBuffer = fs.readFileSync('./db/user-profiles.json', 'utf-8');
+    const profiles = JSON.parse(dataBuffer);
+    return profiles;
+}
+
+// find profile by name
+const findProfile = (username) => {
+    const profiles = loadProfiles();
+    const profile = profiles.find(
+        (profile) => profile.username.toLowerCase() === username.toLowerCase()
+    );
+
+    return profile;
+}
+
+// Write & replace user-profiles.json file with new data
+const saveProfiles = (profiles) => {
+    fs.writeFileSync('./db/user-profiles.json', JSON.stringify(profiles));
+}
+
+// Add new profile data
+const addProfile = (profile) => {
+    const profiles = loadProfiles();
+    profiles.push(profile);
+    saveProfiles(profiles);
+}
+
+// Check for duplicate name
+const checkDuplicate = (username) => {
+    const profiles = loadProfiles();
+    return profiles.find((profile) => profile.username === username);
+}
+
+// Delete profile
+const deleteProfile = (username) => {
+    const profiles = loadProfiles();
+    const filteredProfiles = profiles.filter((profile) => profile.username !== username);
+    saveProfiles(filteredProfiles);
+}
+
+// Update profiles
+const updateProfiles = (newProfile) => {
+    const profiles = loadProfiles();
+    // delete old profile which is same as old name
+    const filteredProfiles = profiles.filter((profiles) => profiles.username !== newProfile.oldUsername);
+    delete newProfile.oldUsername;
+    filteredProfiles.push(newProfile);
+    saveProfiles(filteredProfiles);
+}
+
+module.exports = { rockP1, paperP1, scissorsP1, gamelog, readScoresBuffer, writeScoresBuffer, loadProfiles, findProfile, saveProfiles, addProfile, checkDuplicate, deleteProfile, updateProfiles, currentUser };

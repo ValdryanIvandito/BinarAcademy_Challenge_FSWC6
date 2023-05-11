@@ -1,6 +1,6 @@
 const express = require('express');
-const { rockP1, paperP1, scissorsP1, gamelog, readScoresBuffer, writeScoresBuffer } = require('../utils/script.js');
-
+const { rockP1, paperP1, scissorsP1, gamelog, readScoresBuffer, writeScoresBuffer, loadProfiles, findProfile, saveProfiles, addProfile, checkDuplicate, deleteProfile, updateProfiles, currentUser } = require('../utils/script.js');
+const { body, validationResult, check } = require('express-validator');
 const router = express.Router();
 
 router.get('/', (req, res) => {
@@ -23,8 +23,13 @@ router.get('/login', (req, res) => {
 
 router.get('/profile', (req, res) => {
     const title = 'profile page';
+    const scores = readScoresBuffer();
+    const username = req.body.username;
+    const birthday = req.body.birthday;
+    const hobby = req.body.hobby;
+    console.log(`${title}, ${scores}, ${username}, ${birthday}, ${hobby}`);
     res.status(200);
-    res.render('profile', { title });
+    res.render('profile', { title, scores, username, birthday, hobby });
 });
 
 router.get('/game', (req, res) => {
@@ -32,25 +37,51 @@ router.get('/game', (req, res) => {
     const playerOne = null;
     const playerCom = null;
     const result = null;
-    const scoresResult = readScoresBuffer()
+    const scoresResult = readScoresBuffer();
     res.status(200);
     res.render('game', { title, playerOne, playerCom, result, scoresResult });
 });
 
 router.post('/sign-up', (req, res) => {
-    res.redirect('sign-up');
+    res.redirect('/sign-up');
 });
 
 router.post('/login', (req, res) => {
-    res.redirect('login');
+    res.redirect('/login');
 });
 
-router.post('/profile', (req, res) => {
-    res.redirect('profile');
+// process add contact data
+router.post('/profile', [
+    body('username').custom((value) => {
+        const duplicate = checkDuplicate(value);
+        if (duplicate) {
+            throw new Error('Username already exists!')
+        }
+        return true;
+    }),
+    body('confirm-password').custom((value, { req }) => {
+        if (value !== req.body.password) {
+          throw new Error('Password confirmation does not match password');
+        }
+        return true;
+      }),
+    ], (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+
+        res.render('sign-up', { 
+            title: 'sign-up page',
+            errors: errors.array(),
+        });
+    } else {
+        addProfile(req.body);
+        currentUser(req.body.username);
+        res.redirect('/profile');
+    }
 });
 
 router.post('/game', (req, res) => {
-    res.redirect('game');
+    res.redirect('/game');
 });
 
 router.post('/index', (req, res) => {
