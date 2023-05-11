@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Sign In</title>
+  <title><%= title %></title>
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
   <style>
@@ -28,7 +28,6 @@
   <div class="container">
     <div class="row">
       <div class="col-md-6 offset-md-3">
-        <h1>Sign In</h1>
         <form>
           <div class="form-group">
             <label for="username">Username:</label>
@@ -38,7 +37,14 @@
             <label for="password">Password:</label>
             <input type="password" class="form-control" id="password">
           </div>
-          <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+          <div>
+            <form method="post" action="/profile">
+              <button type="submit" class="btn btn-primary btn-block">Login</button>
+            </form>
+            <form method="post" action="/sign-up">
+              <button type="submit" class="btn btn-danger btn-block">Create Account</button>
+            </form>
+          </div>
         </form>
       </div>
     </div>

@@ -24,22 +24,26 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav mr-auto">
                         <li class="nav-item">
-                            <a class="nav-link" href="#">HOME <span class="sr-only">(current)</span></a>
+                            <a class="nav-link"><button type="submit" style="background-color: transparent; border: none; color: lightgray">HOME</button></a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">WORK</a>
+                            <a class="nav-link"><button type="submit" style="background-color: transparent; border: none; color: lightgray">WORK</button></a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">CONTACT</a>
+                            <a class="nav-link"><button type="submit" style="background-color: transparent; border: none; color: lightgray">CONTACT</button></a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">ABOUT ME</a>
+                            <a class="nav-link"><button type="submit" style="background-color: transparent; border: none; color: lightgray">ABOUT ME</button></a>
                         </li>
                     </ul>
 
                     <div class="navbar-nav ml-auto">
-                        <a class="nav-link" href="#">SIGN UP</a>
-                        <a class="nav-link" href="#">LOGIN</a>
+                      <form method="post" action="/sign-up">
+                        <a class="nav-link"><button type="submit" style="background-color: transparent; border: none; color: lightgray">SIGN UP</button></a>
+                      </form>
+                      <form method="post" action="/login">
+                        <a class="nav-link"><button type="submit" style="background-color: transparent; border: none; color: lightgray">LOGIN</button></a>
+                      </form>
                     </div>
                 </div>
                 </div>
@@ -50,7 +54,7 @@
             <h1>PLAY TRADITIONAL GAME</h1>
             <h3>Experience new traditional game play</h3>
             <div class="buttonPlay">
-              <form method="post" action="/sign-in">
+              <form method="post" action="/profile">
                 <button type="submit" style="color:white; text-decoration: none;">
                   PLAY NOW
                 </button>

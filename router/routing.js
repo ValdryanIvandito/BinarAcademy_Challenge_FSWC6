@@ -9,10 +9,22 @@ router.get('/', (req, res) => {
     res.render('index', { title });
 });
 
-router.get('/sign-in', (req, res) => {
-    const title = 'sign-in';
+router.get('/sign-up', (req, res) => {
+    const title = 'sign-up page';
     res.status(200);
     res.render('sign-up', { title });
+});
+
+router.get('/login', (req, res) => {
+    const title = 'login page';
+    res.status(200);
+    res.render('login', { title });
+});
+
+router.get('/profile', (req, res) => {
+    const title = 'profile page';
+    res.status(200);
+    res.render('profile', { title });
 });
 
 router.get('/game', (req, res) => {
@@ -25,19 +37,27 @@ router.get('/game', (req, res) => {
     res.render('game', { title, playerOne, playerCom, result, scoresResult });
 });
 
-router.post('/sign-in', (req, res) => {
-    res.redirect('sign-in');
+router.post('/sign-up', (req, res) => {
+    res.redirect('sign-up');
 });
 
-router.post('/submit-game', (req, res) => {
+router.post('/login', (req, res) => {
+    res.redirect('login');
+});
+
+router.post('/profile', (req, res) => {
+    res.redirect('profile');
+});
+
+router.post('/game', (req, res) => {
     res.redirect('game');
 });
 
-router.post('/submit-index', (req, res) => {
+router.post('/index', (req, res) => {
     res.redirect('/');
 });
 
-router.post('/submit-restart', (req, res) => {
+router.post('/restart', (req, res) => {
     res.redirect('/game');
 });
 

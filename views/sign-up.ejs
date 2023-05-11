@@ -33,15 +33,11 @@
   <div class="container">
     <div class="row">
       <div class="col-md-6 offset-md-3">
-        <h1>Sign Up</h1>
-        <form>
+        <h1>Create Account</h1>
+        <form method="post" action="/profile">
           <div class="form-group">
-            <label for="fullname">Full Name:</label>
-            <input type="text" class="form-control" id="fullname">
-          </div>
-          <div class="form-group">
-            <label for="lastname">Last Name:</label>
-            <input type="text" class="form-control" id="lastname">
+            <label for="username">Username:</label>
+            <input type="text" class="form-control" id="username" required>
           </div>
           <div class="form-group">
             <label for="sex">Sex:</label>
@@ -52,23 +48,19 @@
           </div>
           <div class="form-group">
             <label for="birthday">Birthday:</label>
-            <input type="date" class="form-control" id="birthday">
+            <input type="date" class="form-control" id="birthday" required>
           </div>
           <div class="form-group">
             <label for="hobby">Hobby:</label>
-            <input type="text" class="form-control" id="hobby">
-          </div>
-          <div class="form-group">
-            <label for="username">Username:</label>
-            <input type="text" class="form-control" id="username">
+            <input type="text" class="form-control" id="hobby" required>
           </div>
           <div class="form-group">
             <label for="password">Password:</label>
-            <input type="password" class="form-control" id="password">
+            <input type="password" class="form-control" id="password" required>
           </div>
           <div class="form-group">
             <label for="confirm-password">Confirm Password:</label>
-            <input type="password" class="form-control" id="confirm-password">
+            <input type="password" class="form-control" id="confirm-password" required>
           </div>
           <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
         </form>
