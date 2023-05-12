@@ -28,7 +28,7 @@
   <div class="container">
     <div class="row">
       <div class="col-md-6 offset-md-3">
-        <form>
+        <form method="post" action="/check-credential">
           <div class="form-group">
             <label for="username">Username:</label>
             <input type="text" class="form-control" id="username">
@@ -37,10 +37,9 @@
             <label for="password">Password:</label>
             <input type="password" class="form-control" id="password">
           </div>
+          <button type="submit" class="btn btn-primary btn-block">Login</button>
+          <br>
           <div>
-            <form method="post" action="/profile">
-              <button type="submit" class="btn btn-primary btn-block">Login</button>
-            </form>
             <form method="post" action="/sign-up">
               <button type="submit" class="btn btn-danger btn-block">Create Account</button>
             </form>

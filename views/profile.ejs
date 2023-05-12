@@ -21,7 +21,12 @@
     <div class="container mt-5">
         <div class="row">
             <div class="col text-center">
-                <img src="../female.png" alt="Profile Picture" class="img-thumbnail rounded-circle" width="150">
+                <% if (sex == 'Male') { %>
+                    <img src="../male.png" alt="Profile Picture" class="img-thumbnail rounded-circle" width="150">
+                <% } %>
+                <% if (sex == 'Female') { %>
+                    <img src="../female.png" alt="Profile Picture" class="img-thumbnail rounded-circle" width="150">
+                <% } %>
                 <br><br>
                 <h1 class="display-6"><%= username %></h1>
                 <h3>Score <%= scores %></h3>

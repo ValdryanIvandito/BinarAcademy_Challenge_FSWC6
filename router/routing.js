@@ -1,5 +1,5 @@
 const express = require('express');
-const { rockP1, paperP1, scissorsP1, gamelog, readScoresBuffer, writeScoresBuffer, loadProfiles, findProfile, saveProfiles, addProfile, checkDuplicate, deleteProfile, updateProfiles, currentUser } = require('../utils/script.js');
+const { rockP1, paperP1, scissorsP1, gamelog, readScoresBuffer, writeScoresBuffer, loadProfile, loadProfiles, findProfile, saveProfiles, addProfile, checkDuplicate, deleteProfile, updateProfiles, addCredential, writeCurrentUser, readCurrentUser } = require('../utils/script.js');
 const { body, validationResult, check } = require('express-validator');
 const router = express.Router();
 
@@ -23,13 +23,20 @@ router.get('/login', (req, res) => {
 
 router.get('/profile', (req, res) => {
     const title = 'profile page';
+
     const scores = readScoresBuffer();
-    const username = req.body.username;
-    const birthday = req.body.birthday;
-    const hobby = req.body.hobby;
-    console.log(`${title}, ${scores}, ${username}, ${birthday}, ${hobby}`);
+    const currentuser = readCurrentUser();
+    const profile = loadProfile(currentuser);
+
+    const username = profile.username;
+    const sex = profile.sex;
+    const birthday = profile.birthday;
+    const hobby = profile.hobby;
+
+    console.log(profile);
+
     res.status(200);
-    res.render('profile', { title, scores, username, birthday, hobby });
+    res.render('profile', { title, scores, username, sex, birthday, hobby });
 });
 
 router.get('/game', (req, res) => {
@@ -40,6 +47,18 @@ router.get('/game', (req, res) => {
     const scoresResult = readScoresBuffer();
     res.status(200);
     res.render('game', { title, playerOne, playerCom, result, scoresResult });
+});
+
+router.get('/edit-profile', (req, res) => {
+    const title = 'edit profile page';
+    res.status(200);
+    res.render('edit-profile', {title});
+});
+
+router.get('/edit-credential', (req, res) => {
+    const title = 'edit credential page';
+    res.status(200);
+    res.render('edit-credential', {title});
 });
 
 router.post('/sign-up', (req, res) => {
@@ -74,8 +93,9 @@ router.post('/profile', [
             errors: errors.array(),
         });
     } else {
+        writeCurrentUser(req.body.username);
         addProfile(req.body);
-        currentUser(req.body.username);
+        addCredential(req.body);
         res.redirect('/profile');
     }
 });
@@ -90,6 +110,18 @@ router.post('/index', (req, res) => {
 
 router.post('/restart', (req, res) => {
     res.redirect('/game');
+});
+
+router.post('/check-credential', (req, res) => {
+    res.redirect('/profile');
+});
+
+router.post('/edit-profile', (req, res) => {
+    res.redirect('/edit-profile');
+});
+
+router.post('/edit-credential', (req, res) => {
+    res.redirect('/edit-credential');
 });
 
 router.post('/submit-rock', (req, res) => {
