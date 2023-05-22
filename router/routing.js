@@ -69,13 +69,14 @@ router.post('/check-credential', async (req, res) => {
 
     if (user_profile === null) {
         console.log('Credential is not valid');
-        res.status(404).send('<h1>404 Page not found!</h1>');
+        const errors = 'Incorrect username!';
+        res.render('login', { 
+            title: 'login page',
+            errors,
+        });
     } else {
         const passwordCheck = req.body.password;
         const storedHashedPassword = user_profile.hashedPassword;
-
-        console.log(passwordCheck);
-        console.log(storedHashedPassword);
 
         bcrypt.compare(passwordCheck, storedHashedPassword, (err, isPasswordCorrect) => {
             if (err) {
@@ -94,18 +95,65 @@ router.post('/check-credential', async (req, res) => {
                 res.render('profile', { title, scores, username, sex, birthday, hobby });
             } else {
                 console.log('Incorrect password');
-                res.status(401).send('<h1>Unauthorized</h1>');
+                const errors = 'Incorrect password!';
+                res.render('login', { 
+                    title: 'login page',
+                    errors,
+                });
             }
         });
     }
 });
+
+// // check credential
+// router.post('/check-credential', [
+//     body('username').custom(async (value) => {
+//         const user_profile = await User_Profile.findOne({ username: value });
+//         const passwordCheck = req.body.password;
+//         const storedHashedPassword = user_profile.hashedPassword;
+
+//         if (user_profile == null) {
+//             throw new Error('Incorrect username!');
+//         }
+
+//         bcrypt.compare(passwordCheck, storedHashedPassword, (err, isPasswordCorrect) => {
+//             if (err) {
+//                 console.log('Error comparing passwords:', err);
+//                 res.status(500).send('<h1>Internal Server Error</h1>');
+//             } else if (!isPasswordCorrect) {
+//                 throw new Error('Incorrect password!');
+//             } 
+//         });
+
+//         return true; 
+//     }),
+//     ], (req, res) => {
+//         const errors = validationResult(req);
+//         if (!errors.isEmpty()) {
+//             res.render('login', { 
+//                 title: 'login page',
+//                 errors: errors.array(),
+//             });
+//         } else {
+//             const title = 'profile page';
+//             const scores = readScoresBuffer();
+//             const username = user_profile.username;
+//             const sex = user_profile.sex;
+//             const birthday = user_profile.birthday;
+//             const hobby = user_profile.hobby;
+
+//             writeCurrentUser(username);
+//             res.status(200);
+//             res.render('profile', { title, scores, username, sex, birthday, hobby });
+//         }
+// });
 
 // add contact data 
 router.post('/profile', [
     body('username').custom(async (value) => {
         const duplicate = await User_Profile.findOne({ username: value });
         if (duplicate) {
-            throw new Error('Username already exists!')
+            throw new Error('Username already exists!');
         }
         return true;
     }),

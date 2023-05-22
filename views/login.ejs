@@ -25,6 +25,14 @@
   </style>
 </head>
 <body>
+  <% if (typeof errors != 'undefined') { %>
+    <div class="alert alert-danger" role="alert">
+        <ul>
+            <li><%= errors %></li>
+        </ul>
+    </div>
+  <% } %>
+
   <div class="container">
     <div class="row">
       <div class="col-md-6 offset-md-3">
