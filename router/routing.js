@@ -1,7 +1,15 @@
 const express = require('express');
-const { rockP1, paperP1, scissorsP1, gamelog, readScoresBuffer, writeScoresBuffer, loadProfile, loadProfiles, findProfile, saveProfiles, addProfile, checkDuplicate, deleteProfile, updateProfiles, addCredential, writeCurrentUser, readCurrentUser } = require('../utils/script.js');
+const bcrypt = require('bcrypt');
+const { rockP1, paperP1, scissorsP1, gamelog, readScoresBuffer, writeScoresBuffer, loadProfile, loadProfiles, findProfile, saveProfiles, addProfile, checkDuplicate, deleteProfile, updateProfiles, addCredential, writeCurrentUser, readCurrentUser, loadCredential } = require('../utils/script.js');
 const { body, validationResult, check } = require('express-validator');
 const router = express.Router();
+const methodOverride = require('method-override');
+
+require('../utils/db');
+const User_Profile = require('../model/credential');
+
+// setup method override
+router.use(methodOverride('_method'));
 
 router.get('/', (req, res) => {
     const title = 'landing page';
@@ -21,44 +29,8 @@ router.get('/login', (req, res) => {
     res.render('login', { title });
 });
 
-router.get('/profile', (req, res) => {
-    const title = 'profile page';
-
-    const scores = readScoresBuffer();
-    const currentuser = readCurrentUser();
-    const profile = loadProfile(currentuser);
-
-    const username = profile.username;
-    const sex = profile.sex;
-    const birthday = profile.birthday;
-    const hobby = profile.hobby;
-
-    console.log(profile);
-
-    res.status(200);
-    res.render('profile', { title, scores, username, sex, birthday, hobby });
-});
-
-router.get('/game', (req, res) => {
-    const title = 'game page';
-    const playerOne = null;
-    const playerCom = null;
-    const result = null;
-    const scoresResult = readScoresBuffer();
-    res.status(200);
-    res.render('game', { title, playerOne, playerCom, result, scoresResult });
-});
-
-router.get('/edit-profile', (req, res) => {
-    const title = 'edit profile page';
-    res.status(200);
-    res.render('edit-profile', {title});
-});
-
-router.get('/edit-credential', (req, res) => {
-    const title = 'edit credential page';
-    res.status(200);
-    res.render('edit-credential', {title});
+router.post('/index', (req, res) => {
+    res.redirect('/');
 });
 
 router.post('/sign-up', (req, res) => {
@@ -69,10 +41,30 @@ router.post('/login', (req, res) => {
     res.redirect('/login');
 });
 
-// process add contact data
+router.post('/game', (req, res) => {
+    const title = 'game page';
+    const playerOne = null;
+    const playerCom = null;
+    const result = null;
+    const scoresResult = readScoresBuffer();
+    res.status(200);
+    res.render('game', { title, playerOne, playerCom, result, scoresResult });
+});
+
+router.post('/restart', (req, res) => {
+    const title = 'game page';
+    const playerOne = null;
+    const playerCom = null;
+    const result = null;
+    const scoresResult = readScoresBuffer();
+    res.status(200);
+    res.render('game', { title, playerOne, playerCom, result, scoresResult });
+});
+
+// add contact data 
 router.post('/profile', [
-    body('username').custom((value) => {
-        const duplicate = checkDuplicate(value);
+    body('username').custom(async (value) => {
+        const duplicate = await User_Profile.findOne({ username: value });
         if (duplicate) {
             throw new Error('Username already exists!')
         }
@@ -93,35 +85,151 @@ router.post('/profile', [
             errors: errors.array(),
         });
     } else {
-        writeCurrentUser(req.body.username);
-        addProfile(req.body);
-        addCredential(req.body);
-        res.redirect('/profile');
+        const username = req.body.username;
+        const sex = req.body.sex;
+        const birthday = req.body.birthday;
+        const hobby = req.body.hobby;
+
+        const saltRounds = 10;
+        const salt = bcrypt.genSaltSync(saltRounds);
+
+        // Hash the password using the salt
+        const passwordGenerate = req.body.password;
+        const hashedPassword = bcrypt.hashSync(passwordGenerate, salt);
+
+        writeCurrentUser(username);
+        User_Profile.insertMany({ username, sex, birthday, hobby, hashedPassword });
+
+        const title = 'profile page';
+        const scores = readScoresBuffer();
+
+        res.status(200);
+        res.render('profile', { title, scores, username, sex, birthday, hobby });
     }
 });
 
-router.post('/game', (req, res) => {
-    res.redirect('/game');
+router.post('/check-credential', async (req, res) => {
+    const user_profile = await User_Profile.findOne({ username: req.body.username });
+    console.log(user_profile);
+
+    if (user_profile === null) {
+        console.log('Credential is not valid');
+        res.status(404).send('<h1>404 Page not found!</h1>');
+    } else {
+        const passwordCheck = req.body.password;
+        const storedHashedPassword = user_profile.hashedPassword;
+
+        console.log(passwordCheck);
+        console.log(storedHashedPassword);
+
+        bcrypt.compare(passwordCheck, storedHashedPassword, (err, isPasswordCorrect) => {
+            if (err) {
+                console.log('Error comparing passwords:', err);
+                res.status(500).send('<h1>Internal Server Error</h1>');
+            } else if (isPasswordCorrect) {
+                const title = 'profile page';
+                const scores = readScoresBuffer();
+                const username = user_profile.username;
+                const sex = user_profile.sex;
+                const birthday = user_profile.birthday;
+                const hobby = user_profile.hobby;
+
+                writeCurrentUser(username);
+                res.status(200);
+                res.render('profile', { title, scores, username, sex, birthday, hobby });
+            } else {
+                console.log('Incorrect password');
+                res.status(401).send('<h1>Unauthorized</h1>');
+            }
+        });
+    }
 });
 
-router.post('/index', (req, res) => {
-    res.redirect('/');
+// profile data edit form
+router.post('/profile/edit/', async (req, res) => {
+    const profile = await User_Profile.findOne({ username: req.body.username });
+
+    const title = 'edit page';
+    const oldUsername = profile.username;
+    const username = profile.username;
+    const sex = profile.sex;
+    const birthday = profile.birthday;
+    const hobby = profile.hobby;
+    const _id = profile._id;
+
+    console.log(profile);
+    res.render('edit-profile', { title, oldUsername, username, sex, birthday, hobby, _id });
 });
 
-router.post('/restart', (req, res) => {
-    res.redirect('/game');
+// process data edit 
+router.put('/profile', [
+    body('username').custom(async (value, {req}) => {
+        const duplicate = await User_Profile.findOne({ username: value });
+        if (value !== req.body.oldUsername && duplicate) {
+            throw new Error('Name already exists!')
+        }
+        return true;
+    }),
+    ], (req, res) => {
+        
+    const errors = validationResult(req);
+    const oldUsername = req.body.username;
+    const username = req.body.username;
+    const sex = req.body.sex;
+    const birthday = req.body.birthday;
+    const hobby = req.body.hobby;
+    const _id = req.body._id;
+
+    if (!errors.isEmpty()) {
+        res.render('edit-profile', { 
+            title: 'profile data edit form',
+            errors: errors.array(),
+            oldUsername,
+            username,
+            sex,
+            birthday,
+            hobby,
+            _id,
+        });
+    } else {
+        User_Profile.updateOne(
+            { _id: req.body._id },
+            {
+                $set: {
+                    username: req.body.username,
+                    sex: req.body.sex,
+                    birthday: req.body.birthday,
+                    hobby: req.body.hobby,
+                },
+            }
+        ).then(async result => {
+            // send flash message
+            // req.flash('msg', 'Contact data changed successfully!');
+            // res.redirect('/profile');
+
+            const profile = await User_Profile.findOne({ username: req.body.username });
+
+            const title = 'profile page';
+            const username = profile.username;
+            const sex = profile.sex;
+            const birthday = profile.birthday;
+            const hobby = profile.hobby;
+
+            const scores = readScoresBuffer();
+
+            console.log(profile);
+
+            res.status(200);
+            res.render('profile', { title, scores, username, sex, birthday, hobby });
+        });
+    }
 });
 
-router.post('/check-credential', (req, res) => {
-    res.redirect('/profile');
-});
-
-router.post('/edit-profile', (req, res) => {
-    res.redirect('/edit-profile');
-});
-
-router.post('/edit-credential', (req, res) => {
-    res.redirect('/edit-credential');
+// delete profile data 
+router.delete('/profile', (req, res) => {
+    User_Profile.deleteOne({ username: req.body.username }).then((result) => {
+        res.redirect('/');
+    }); 
 });
 
 router.post('/submit-rock', (req, res) => {
@@ -136,6 +244,7 @@ router.post('/submit-rock', (req, res) => {
     writeScoresBuffer(scoresResult);
 
     gamelog(playerOne, playerCom, result, scoresResult);
+
     res.status(200);
     res.render('game', { title, playerOne, playerCom, result, scoresResult });
 });

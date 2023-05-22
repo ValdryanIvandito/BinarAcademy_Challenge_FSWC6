@@ -1,6 +1,9 @@
 const fs = require('fs');
 const bcrypt = require('bcrypt');
 
+require('../utils/db');
+const { User_Credential, User_Profile } = require('../model/credential');
+
 const value = ["scissors", "paper", "rock"];
 let valueOne, valueCom;
 let scores = 0;
@@ -143,6 +146,13 @@ const loadProfiles = () => {
     return profiles;
 }
 
+// load credential data from user-credentials.json
+const loadCredential = (username) => {
+    const credentials = loadCredentials();
+    const filteredCredential = credentials.filter((credentials) => credentials.username == username);
+    return filteredCredential[0];
+}
+
 // load credentials data from user-credentials.json
 const loadCredentials = () => {
     const dataBuffer = fs.readFileSync('./db/user-credentials.json', 'utf-8');
@@ -150,29 +160,43 @@ const loadCredentials = () => {
     return credentials;
 }
 
-// Write & replace user-profiles.json file with new data
-const saveProfiles = (profiles) => {
-    fs.writeFileSync('./db/user-profiles.json', JSON.stringify(profiles));
-}
-
 // Write & replace user-credentials.json file with new data
 const saveCredentials = (profiles) => {
     fs.writeFileSync('./db/user-credentials.json', JSON.stringify(profiles));
 }
 
+// Write & replace user-profiles.json file with new data
+const saveProfiles = (profiles) => {
+    fs.writeFileSync('./db/user-profiles.json', JSON.stringify(profiles));
+}
+
 // Add new profile data
-const addProfile = (profile) => {
-    const username = profile.username;
-    const sex = profile.sex;
-    const birthday = profile.birthday;
-    const hobby = profile.hobby;
-    const profiles = loadProfiles();
-    profiles.push( {username, sex, birthday, hobby});
-    saveProfiles(profiles);
+const addProfile = async (profile) => {
+    await User_Profile.insertOne(req.body);
+
+    // const username = profile.username;
+    // const sex = profile.sex;
+    // const birthday = profile.birthday;
+    // const hobby = profile.hobby;
+    // const profiles = loadProfiles();
+    // profiles.push( {username, sex, birthday, hobby});
+    // saveProfiles(profiles);
 }
 
 // Add new credential data
-const addCredential = (profile) => {
+const addCredential = async (profile) => {
+    await User_Credential.insert_one(req.body);
+    // const username = profile.username;
+    // const saltRounds = 10;
+    // const salt = bcrypt.genSaltSync(saltRounds);
+    // const hashedPassword = bcrypt.hashSync(profile.username, salt);
+    // const credentials = loadCredentials();
+    // credentials.push({ username, hashedPassword });
+    // saveCredentials(credentials);
+}
+
+// Read credential data
+const readCredential = (profile) => {
     const username = profile.username;
     const saltRounds = 10;
     const salt = bcrypt.genSaltSync(saltRounds);
@@ -205,4 +229,4 @@ const updateProfiles = (newProfile) => {
     saveProfiles(filteredProfiles);
 }
 
-module.exports = { rockP1, paperP1, scissorsP1, gamelog, readScoresBuffer, writeScoresBuffer, loadProfile, loadProfiles, findProfile, saveProfiles, addProfile, checkDuplicate, deleteProfile, updateProfiles, addCredential, writeCurrentUser, readCurrentUser };
+module.exports = { rockP1, paperP1, scissorsP1, gamelog, readScoresBuffer, writeScoresBuffer, loadProfile, loadProfiles, findProfile, saveProfiles, addProfile, checkDuplicate, deleteProfile, updateProfiles, addCredential, writeCurrentUser, readCurrentUser, loadCredential };

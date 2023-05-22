@@ -33,13 +33,15 @@
                 <br>
                 <p class="lead">Birthday: <%= birthday %></p>
                 <p class="lead">Hobby: <%= hobby %></p>
-                <form method="post" action="/edit-profile" class="d-grid gap-2 col-sm-6 mx-auto">
-                    <button type="submit" class="btn btn-lg btn-danger" type="button">Edit Profile</button>
+                <form method="POST" action="/profile?_method=DELETE" class="d-grid gap-2 col-sm-6 mx-auto">
+                    <input type="hidden" name="username" value="<%= username %>">
+                    <button type="submit" class="btn btn-lg btn-danger" type="button" onclick="return confirm('Are you sure?')">Delete Profile</button>
                 </form>
-                <form method="post" action="/change-password" class="d-grid gap-2 col-sm-6 mx-auto">
-                    <button type="submit" class="btn btn-lg btn-primary" type="button">Change Password</button>
+                <form method="POST" action="/profile/edit" class="d-grid gap-2 col-sm-6 mx-auto">
+                    <input type="hidden" name="username" value="<%= username %>">
+                    <button type="submit" class="btn btn-lg btn-primary" type="button">Edit Profile</button>
                 </form>
-                <form method="post" action="/game">
+                <form method="POST" action="/game">
                     <button type="submit" class="btn btn-lg playing-btn" style="background-color: #FFB548; color: white;">Play</button>
                 </form>  
             </div>

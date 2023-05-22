@@ -33,26 +33,27 @@
                     </div>
                 <% } %>
     
-                <form method="post" action="/contact/update">
-                    <input type="hidden" name="oldUsername" value="<%= (profile.oldUsername) ? profile.oldUsername : profile.username %>">
+                <form method="POST" action="/profile?_method=PUT">
+                    <input type="hidden" name="_id" value="<%= _id %>"/>
+                    <input type="hidden" name="oldUsername" value="<%= oldUsername || username %>"/>
                     <div class="mb-3">
                       <label for="name" class="form-label">Username</label>
-                      <input type="text" class="form-control" id="username" name="username" required value="<%= profile.username %>">
+                      <input type="text" class="form-control" id="username" name="username" required value="<%= username %>">
                     </div>
                     <div class="mb-3">
                         <label for="sex" class="form-label">Sex:</label>
-                        <select class="form-control" id="sex" name="sex" required value="<%= profile.sex %>">
+                        <select class="form-control" id="sex" name="sex" required value="<%= sex %>">
                           <option>Male</option>
                           <option>Female</option>
                         </select>
                     </div>
                     <div class="mb-3">
                         <label for="birthday" class="form-label">Birthday:</label>
-                        <input type="date" class="form-control" id="birthday" name="birthday" required value="<%= profile.birthday %>">
+                        <input type="date" class="form-control" id="birthday" name="birthday" required value="<%= birthday %>">
                     </div>
                     <div class="mb-3">
                       <label for="email" class="form-label">Hobby</label>
-                      <input type="text" class="form-control" id="hobby" name="hobby" required value="<%= profile.hobby %>">
+                      <input type="text" class="form-control" id="hobby" name="hobby" required value="<%= hobby %>">
                     </div>
                     <button type="submit" class="btn btn-primary">Change Profile</button>
                 </form>
