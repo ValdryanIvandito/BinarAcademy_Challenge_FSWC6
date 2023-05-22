@@ -4,6 +4,8 @@ const { rockP1, paperP1, scissorsP1, gamelog, readScoresBuffer, writeScoresBuffe
 const { body, validationResult, check } = require('express-validator');
 const router = express.Router();
 const methodOverride = require('method-override');
+const flash = require('express-flash');
+const session = require('express-session');
 
 require('../utils/db');
 const User_Profile = require('../model/credential');
@@ -61,6 +63,43 @@ router.post('/restart', (req, res) => {
     res.render('game', { title, playerOne, playerCom, result, scoresResult });
 });
 
+router.post('/check-credential', async (req, res) => {
+    const user_profile = await User_Profile.findOne({ username: req.body.username });
+    console.log(user_profile);
+
+    if (user_profile === null) {
+        console.log('Credential is not valid');
+        res.status(404).send('<h1>404 Page not found!</h1>');
+    } else {
+        const passwordCheck = req.body.password;
+        const storedHashedPassword = user_profile.hashedPassword;
+
+        console.log(passwordCheck);
+        console.log(storedHashedPassword);
+
+        bcrypt.compare(passwordCheck, storedHashedPassword, (err, isPasswordCorrect) => {
+            if (err) {
+                console.log('Error comparing passwords:', err);
+                res.status(500).send('<h1>Internal Server Error</h1>');
+            } else if (isPasswordCorrect) {
+                const title = 'profile page';
+                const scores = readScoresBuffer();
+                const username = user_profile.username;
+                const sex = user_profile.sex;
+                const birthday = user_profile.birthday;
+                const hobby = user_profile.hobby;
+
+                writeCurrentUser(username);
+                res.status(200);
+                res.render('profile', { title, scores, username, sex, birthday, hobby });
+            } else {
+                console.log('Incorrect password');
+                res.status(401).send('<h1>Unauthorized</h1>');
+            }
+        });
+    }
+});
+
 // add contact data 
 router.post('/profile', [
     body('username').custom(async (value) => {
@@ -108,43 +147,6 @@ router.post('/profile', [
     }
 });
 
-router.post('/check-credential', async (req, res) => {
-    const user_profile = await User_Profile.findOne({ username: req.body.username });
-    console.log(user_profile);
-
-    if (user_profile === null) {
-        console.log('Credential is not valid');
-        res.status(404).send('<h1>404 Page not found!</h1>');
-    } else {
-        const passwordCheck = req.body.password;
-        const storedHashedPassword = user_profile.hashedPassword;
-
-        console.log(passwordCheck);
-        console.log(storedHashedPassword);
-
-        bcrypt.compare(passwordCheck, storedHashedPassword, (err, isPasswordCorrect) => {
-            if (err) {
-                console.log('Error comparing passwords:', err);
-                res.status(500).send('<h1>Internal Server Error</h1>');
-            } else if (isPasswordCorrect) {
-                const title = 'profile page';
-                const scores = readScoresBuffer();
-                const username = user_profile.username;
-                const sex = user_profile.sex;
-                const birthday = user_profile.birthday;
-                const hobby = user_profile.hobby;
-
-                writeCurrentUser(username);
-                res.status(200);
-                res.render('profile', { title, scores, username, sex, birthday, hobby });
-            } else {
-                console.log('Incorrect password');
-                res.status(401).send('<h1>Unauthorized</h1>');
-            }
-        });
-    }
-});
-
 // profile data edit form
 router.post('/profile/edit/', async (req, res) => {
     const profile = await User_Profile.findOne({ username: req.body.username });
@@ -157,21 +159,11 @@ router.post('/profile/edit/', async (req, res) => {
     const hobby = profile.hobby;
     const _id = profile._id;
 
-    console.log(profile);
     res.render('edit-profile', { title, oldUsername, username, sex, birthday, hobby, _id });
 });
 
 // process data edit 
-router.put('/profile', [
-    body('username').custom(async (value, {req}) => {
-        const duplicate = await User_Profile.findOne({ username: value });
-        if (value !== req.body.oldUsername && duplicate) {
-            throw new Error('Name already exists!')
-        }
-        return true;
-    }),
-    ], (req, res) => {
-        
+router.put('/profile', (req, res) => {   
     const errors = validationResult(req);
     const oldUsername = req.body.username;
     const username = req.body.username;
@@ -203,21 +195,13 @@ router.put('/profile', [
                 },
             }
         ).then(async result => {
-            // send flash message
-            // req.flash('msg', 'Contact data changed successfully!');
-            // res.redirect('/profile');
-
             const profile = await User_Profile.findOne({ username: req.body.username });
-
             const title = 'profile page';
             const username = profile.username;
             const sex = profile.sex;
             const birthday = profile.birthday;
             const hobby = profile.hobby;
-
             const scores = readScoresBuffer();
-
-            console.log(profile);
 
             res.status(200);
             res.render('profile', { title, scores, username, sex, birthday, hobby });
