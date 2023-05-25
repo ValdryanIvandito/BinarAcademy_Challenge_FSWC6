@@ -29,7 +29,7 @@
                 <% } %>
                 <br><br>
                 <h1 class="display-6"><%= username %></h1>
-                <h3>Score <%= scores %></h3>
+                <h3>Scores <%= scores %></h3>
                 <br>
                 <p class="lead">Birthday: <%= birthday %></p>
                 <p class="lead">Hobby: <%= hobby %></p>
@@ -42,6 +42,7 @@
                     <button type="submit" class="btn btn-lg btn-primary" type="button">Edit Profile</button>
                 </form>
                 <form method="POST" action="/game">
+                    <input type="hidden" name="scores" value="<%= scores %>">
                     <button type="submit" class="btn btn-lg playing-btn" style="background-color: #FFB548; color: white;">Play</button>
                 </form>  
             </div>

@@ -6,9 +6,19 @@ const router = express.Router();
 const methodOverride = require('method-override');
 const flash = require('express-flash');
 const session = require('express-session');
+const { Pool } = require('pg');
 
 require('../utils/db');
 const User_Profile = require('../model/credential');
+
+// Konfigurasi koneksi database
+const pool = new Pool({
+    user: 'postgres',
+    password: 'admin',
+    host: 'localhost',
+    port: 5432,
+    database: 'fswc6'
+  });
 
 // setup method override
 router.use(methodOverride('_method'));
@@ -48,9 +58,10 @@ router.post('/game', (req, res) => {
     const playerOne = null;
     const playerCom = null;
     const result = null;
-    const scoresResult = readScoresBuffer();
+    const scores = readScoresBuffer();
+    const username = readCurrentUser();
     res.status(200);
-    res.render('game', { title, playerOne, playerCom, result, scoresResult });
+    res.render('game', { title, playerOne, playerCom, result, username, scores });
 });
 
 router.post('/restart', (req, res) => {
@@ -58,14 +69,14 @@ router.post('/restart', (req, res) => {
     const playerOne = null;
     const playerCom = null;
     const result = null;
-    const scoresResult = readScoresBuffer();
+    const scores = readScoresBuffer();
+    const username = readCurrentUser();
     res.status(200);
-    res.render('game', { title, playerOne, playerCom, result, scoresResult });
+    res.render('game', { title, playerOne, playerCom, result, username, scores });
 });
 
 router.post('/check-credential', async (req, res) => {
     const user_profile = await User_Profile.findOne({ username: req.body.username });
-    console.log(user_profile);
 
     if (user_profile === null) {
         console.log('Credential is not valid');
@@ -78,13 +89,15 @@ router.post('/check-credential', async (req, res) => {
         const passwordCheck = req.body.password;
         const storedHashedPassword = user_profile.hashedPassword;
 
-        bcrypt.compare(passwordCheck, storedHashedPassword, (err, isPasswordCorrect) => {
+        bcrypt.compare(passwordCheck, storedHashedPassword, async (err, isPasswordCorrect) => {
+            const result = await pool.query(`SELECT scores FROM user_history WHERE username = '${ req.body.username }'`);
+            const scores = result.rows.map(row => row.scores);
+
             if (err) {
                 console.log('Error comparing passwords:', err);
                 res.status(500).send('<h1>Internal Server Error</h1>');
             } else if (isPasswordCorrect) {
                 const title = 'profile page';
-                const scores = readScoresBuffer();
                 const username = user_profile.username;
                 const sex = user_profile.sex;
                 const birthday = user_profile.birthday;
@@ -105,50 +118,7 @@ router.post('/check-credential', async (req, res) => {
     }
 });
 
-// // check credential
-// router.post('/check-credential', [
-//     body('username').custom(async (value) => {
-//         const user_profile = await User_Profile.findOne({ username: value });
-//         const passwordCheck = req.body.password;
-//         const storedHashedPassword = user_profile.hashedPassword;
-
-//         if (user_profile == null) {
-//             throw new Error('Incorrect username!');
-//         }
-
-//         bcrypt.compare(passwordCheck, storedHashedPassword, (err, isPasswordCorrect) => {
-//             if (err) {
-//                 console.log('Error comparing passwords:', err);
-//                 res.status(500).send('<h1>Internal Server Error</h1>');
-//             } else if (!isPasswordCorrect) {
-//                 throw new Error('Incorrect password!');
-//             } 
-//         });
-
-//         return true; 
-//     }),
-//     ], (req, res) => {
-//         const errors = validationResult(req);
-//         if (!errors.isEmpty()) {
-//             res.render('login', { 
-//                 title: 'login page',
-//                 errors: errors.array(),
-//             });
-//         } else {
-//             const title = 'profile page';
-//             const scores = readScoresBuffer();
-//             const username = user_profile.username;
-//             const sex = user_profile.sex;
-//             const birthday = user_profile.birthday;
-//             const hobby = user_profile.hobby;
-
-//             writeCurrentUser(username);
-//             res.status(200);
-//             res.render('profile', { title, scores, username, sex, birthday, hobby });
-//         }
-// });
-
-// add contact data 
+// add profile data 
 router.post('/profile', [
     body('username').custom(async (value) => {
         const duplicate = await User_Profile.findOne({ username: value });
@@ -163,8 +133,9 @@ router.post('/profile', [
         }
         return true;
       }),
-    ], (req, res) => {
+    ], async (req, res) => {
     const errors = validationResult(req);
+
     if (!errors.isEmpty()) {
 
         res.render('sign-up', { 
@@ -172,11 +143,12 @@ router.post('/profile', [
             errors: errors.array(),
         });
     } else {
+        const title = 'profile page';
         const username = req.body.username;
         const sex = req.body.sex;
         const birthday = req.body.birthday;
         const hobby = req.body.hobby;
-
+        const scores = 0;
         const saltRounds = 10;
         const salt = bcrypt.genSaltSync(saltRounds);
 
@@ -185,10 +157,19 @@ router.post('/profile', [
         const hashedPassword = bcrypt.hashSync(passwordGenerate, salt);
 
         writeCurrentUser(username);
+        writeScoresBuffer(scores);
         User_Profile.insertMany({ username, sex, birthday, hobby, hashedPassword });
 
-        const title = 'profile page';
-        const scores = readScoresBuffer();
+        const profile = await User_Profile.findOne({ username: req.body.username });
+        const _id = profile._id;
+
+        const query = `
+            INSERT INTO user_history (_id, username, scores, created_on)
+            VALUES ($1, $2, $3, NOW())
+            RETURNING *;`;
+
+        const values = [_id, username, scores];
+        const result = await pool.query(query, values);
 
         res.status(200);
         res.render('profile', { title, scores, username, sex, birthday, hobby });
@@ -211,7 +192,7 @@ router.post('/profile/edit/', async (req, res) => {
 });
 
 // process data edit 
-router.put('/profile', (req, res) => {   
+router.put('/profile', async (req, res) => {   
     const errors = validationResult(req);
     const oldUsername = req.body.username;
     const username = req.body.username;
@@ -231,7 +212,17 @@ router.put('/profile', (req, res) => {
             hobby,
             _id,
         });
-    } else {
+    } else { 
+        const query = `
+        UPDATE user_history
+        SET username = $1
+        WHERE _id = $2
+        RETURNING *;`;
+
+        const id = `"${_id}"`;
+        const values = [username, id];
+        const result = await pool.query(query, values);
+
         User_Profile.updateOne(
             { _id: req.body._id },
             {
@@ -258,61 +249,91 @@ router.put('/profile', (req, res) => {
 });
 
 // delete profile data 
-router.delete('/profile', (req, res) => {
+router.delete('/profile', async (req, res) => {
+    const query = `DELETE FROM user_history WHERE username = '${ req.body.username }'`;
+    const result = await pool.query(query);
+
     User_Profile.deleteOne({ username: req.body.username }).then((result) => {
         res.redirect('/');
     }); 
 });
 
-router.post('/submit-rock', (req, res) => {
+router.post('/submit-rock', async (req, res) => {
     const title = 'game page';
     const value = rockP1();
     const playerOne = value.valueOne;
     const playerCom = value.valueCom;
     const result = value.result;
-    const scores = value.scores;
-    
-    const scoresResult = readScoresBuffer() + scores;
-    writeScoresBuffer(scoresResult);
+    const newScores = value.scores;
+    const scores = readScoresBuffer() + newScores;
+    const username = readCurrentUser();
+    writeScoresBuffer(scores);
 
-    gamelog(playerOne, playerCom, result, scoresResult);
+    const query = `
+        UPDATE user_history
+        SET scores = $1
+        WHERE username = $2
+        RETURNING *;`;
+
+        const values = [scores, username];
+        const _result = await pool.query(query, values);
+
+    gamelog(playerOne, playerCom, result, scores);
 
     res.status(200);
-    res.render('game', { title, playerOne, playerCom, result, scoresResult });
+    res.render('game', { title, playerOne, playerCom, result, scores });
 });
 
-router.post('/submit-paper', (req, res) => {
+router.post('/submit-paper', async (req, res) => {
     const title = 'game page';
     const value = paperP1();
     const playerOne = value.valueOne;
     const playerCom = value.valueCom;
     const result = value.result;
-    const scores = value.scores;
-    
-    const scoresResult = readScoresBuffer() + scores;
-    writeScoresBuffer(scoresResult);
+    const newScores = value.scores;
+    const scores = readScoresBuffer() + newScores;
+    const username = readCurrentUser();
+    writeScoresBuffer(scores);
 
-    gamelog(playerOne, playerCom, result, scoresResult);
+    const query = `
+        UPDATE user_history
+        SET scores = $1
+        WHERE username = $2
+        RETURNING *;`;
+
+        const values = [scores, username];
+        const _result = await pool.query(query, values);
+
+    gamelog(playerOne, playerCom, result, scores);
 
     res.status(200);
-    res.render('game', { title, playerOne, playerCom, result, scoresResult });
+    res.render('game', { title, playerOne, playerCom, result, scores });
 });
 
-router.post('/submit-scissors', (req, res) => {
+router.post('/submit-scissors', async (req, res) => {
     const title = 'game page';
     const value = scissorsP1();
     const playerOne = value.valueOne;
     const playerCom = value.valueCom;
     const result = value.result;
-    const scores = value.scores;
-    
-    const scoresResult = readScoresBuffer() + scores;
-    writeScoresBuffer(scoresResult);
+    const newScores = value.scores;
+    const scores = readScoresBuffer() + newScores;
+    const username = readCurrentUser();
+    writeScoresBuffer(scores);
 
-    gamelog(playerOne, playerCom, result, scoresResult);
+    const query = `
+        UPDATE user_history
+        SET scores = $1
+        WHERE username = $2
+        RETURNING *;`;
+
+        const values = [scores, username];
+        const _result = await pool.query(query, values);
+
+    gamelog(playerOne, playerCom, result, scores);
 
     res.status(200);
-    res.render('game', { title, playerOne, playerCom, result, scoresResult });
+    res.render('game', { title, playerOne, playerCom, result, scores });
 });
 
 router.get('*', (req, res) => {

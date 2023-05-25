@@ -1,7 +1,7 @@
 <%- include('layouts/header') %>
 
 <div class="container" style="display: flex; align-items: center; justify-content: center; height: 100%;">
-    <p class="tScores">SCORES <%= scoresResult %></p>
+    <p class="tScores">scores <%= scores %></p>
 </div>
 
 <% if (result === 'PLAYER1 WIN!' && playerOne === 'scissors' && playerCom === 'paper') { %>
@@ -26,4 +26,17 @@
     <%- include('layouts/content') %>
 <% } %>
 
-<%- include('layouts/footer') %>
+<!-- Refresh -->
+        <div class="row align-items-center" style="height: 100px;">
+            <div class="container">
+                <form method="post" action="/restart">
+                    <input type="hidden" name="scores" value="<%= scores %>">
+                    <button class="bRefresh" type="submit">
+                        <img src="../refresh.png" style="width: 77px; height: 71px;">
+                    </button>
+                </form>
+            </div>
+        </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    </body>
+</html>
