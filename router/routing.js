@@ -41,6 +41,19 @@ router.get('/login', (req, res) => {
     res.render('login', { title });
 });
 
+router.get('/rank', (req, res) => {
+    pool.query('SELECT * FROM user_history ORDER BY scores DESC', (error, results) => {
+      if (error) {
+        console.error('Error executing query', error);
+        res.send('An error occurred');
+      } else {
+        const title = 'rank page';
+        res.status(200);
+        res.render('rank', { title, leaderboard: results.rows });
+      }
+    });
+  });
+
 router.post('/index', (req, res) => {
     res.redirect('/');
 });
@@ -51,6 +64,10 @@ router.post('/sign-up', (req, res) => {
 
 router.post('/login', (req, res) => {
     res.redirect('/login');
+});
+
+router.post('/rank', (req, res) => {
+    res.redirect('/rank');
 });
 
 router.post('/game', (req, res) => {
@@ -75,6 +92,19 @@ router.post('/restart', (req, res) => {
     res.render('game', { title, playerOne, playerCom, result, username, scores });
 });
 
+router.post('/back-profile', async (req, res) => {
+    const username = readCurrentUser();
+    const scores = readScoresBuffer();
+    const user_profile = await User_Profile.findOne({ username });
+    const title = 'profile page';
+    const sex = user_profile.sex;
+    const birthday = user_profile.birthday;
+    const hobby = user_profile.hobby;
+
+    res.status(200);
+    res.render('profile', { title, scores, username, sex, birthday, hobby });
+});
+
 router.post('/check-credential', async (req, res) => {
     const user_profile = await User_Profile.findOne({ username: req.body.username });
 
@@ -92,6 +122,7 @@ router.post('/check-credential', async (req, res) => {
         bcrypt.compare(passwordCheck, storedHashedPassword, async (err, isPasswordCorrect) => {
             const result = await pool.query(`SELECT scores FROM user_history WHERE username = '${ req.body.username }'`);
             const scores = result.rows.map(row => row.scores);
+            writeScoresBuffer(scores);
 
             if (err) {
                 console.log('Error comparing passwords:', err);
@@ -258,7 +289,7 @@ router.delete('/profile', async (req, res) => {
     }); 
 });
 
-router.post('/submit-rock', async (req, res) => {
+router.post('/submit-rock', (req, res) => {
     const title = 'game page';
     const value = rockP1();
     const playerOne = value.valueOne;
@@ -276,15 +307,15 @@ router.post('/submit-rock', async (req, res) => {
         RETURNING *;`;
 
         const values = [scores, username];
-        const _result = await pool.query(query, values);
+        const _result = pool.query(query, values);
 
     gamelog(playerOne, playerCom, result, scores);
 
     res.status(200);
-    res.render('game', { title, playerOne, playerCom, result, scores });
+    res.render('game', { title, playerOne, playerCom, result, scores, username });
 });
 
-router.post('/submit-paper', async (req, res) => {
+router.post('/submit-paper', (req, res) => {
     const title = 'game page';
     const value = paperP1();
     const playerOne = value.valueOne;
@@ -302,15 +333,15 @@ router.post('/submit-paper', async (req, res) => {
         RETURNING *;`;
 
         const values = [scores, username];
-        const _result = await pool.query(query, values);
+        const _result = pool.query(query, values);
 
     gamelog(playerOne, playerCom, result, scores);
 
     res.status(200);
-    res.render('game', { title, playerOne, playerCom, result, scores });
+    res.render('game', { title, playerOne, playerCom, result, scores, username });
 });
 
-router.post('/submit-scissors', async (req, res) => {
+router.post('/submit-scissors', (req, res) => {
     const title = 'game page';
     const value = scissorsP1();
     const playerOne = value.valueOne;
@@ -328,12 +359,12 @@ router.post('/submit-scissors', async (req, res) => {
         RETURNING *;`;
 
         const values = [scores, username];
-        const _result = await pool.query(query, values);
+        const _result = pool.query(query, values);
 
     gamelog(playerOne, playerCom, result, scores);
 
     res.status(200);
-    res.render('game', { title, playerOne, playerCom, result, scores });
+    res.render('game', { title, playerOne, playerCom, result, scores, username });
 });
 
 router.get('*', (req, res) => {
